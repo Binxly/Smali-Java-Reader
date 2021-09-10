@@ -1,0 +1,383 @@
+package com.kik.h;
+
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import kik.a.b.g;
+import kik.a.b.h;
+import kik.a.b.k.a;
+import org.c.c;
+
+public final class i
+{
+  private static final org.c.b a = c.a("ContactsStorage");
+  private final SQLiteOpenHelper b;
+  private final int c;
+  
+  public i(SQLiteOpenHelper paramSQLiteOpenHelper)
+  {
+    this.b = paramSQLiteOpenHelper;
+    this.c = 19;
+  }
+  
+  private Hashtable a(boolean paramBoolean)
+  {
+    Hashtable localHashtable = new Hashtable();
+    for (;;)
+    {
+      synchronized (this.b)
+      {
+        HashMap localHashMap = new HashMap();
+        SQLiteDatabase localSQLiteDatabase = this.b.getWritableDatabase();
+        b localb = (b)b.a(localSQLiteDatabase, b.class, "KIKcontactsTable");
+        if ((this.c >= this.c) && (localb.getColumnCount() < 12))
+        {
+          localb.close();
+          localSQLiteDatabase.close();
+          localSQLiteDatabase = this.b.getWritableDatabase();
+          localb = (b)b.a(localSQLiteDatabase, b.class, "KIKcontactsTable");
+        }
+        localb.a(new j(this, paramBoolean, localHashtable));
+        ((w)w.a(localSQLiteDatabase, w.class, "memberTable")).a(new k(this, localHashMap));
+        Iterator localIterator = localHashMap.entrySet().iterator();
+        if (localIterator.hasNext())
+        {
+          Map.Entry localEntry = (Map.Entry)localIterator.next();
+          String str1 = (String)localEntry.getKey();
+          k.a locala = (k.a)localEntry.getValue();
+          if (str1 == null) {
+            continue;
+          }
+          h localh = (h)localHashtable.get(str1);
+          boolean bool1 = true;
+          String str2 = null;
+          if (localh == null) {
+            break label363;
+          }
+          str2 = localh.c();
+          bool1 = localh.p();
+          if (!(localh instanceof kik.a.b.k)) {
+            break label363;
+          }
+          bool2 = ((kik.a.b.k)localh).y();
+          boolean bool4 = ((kik.a.b.k)localh).z();
+          str5 = ((kik.a.b.k)localh).H();
+          str4 = ((kik.a.b.k)localh).r();
+          str3 = ((kik.a.b.k)localh).s();
+          bool3 = bool4;
+          kik.a.b.k localk = new kik.a.b.k(g.a(str1), str2, locala, false, bool1, bool2, str3, str4, str5);
+          localk.h(bool3);
+          localHashtable.put(str1, localk);
+        }
+      }
+      return localHashtable;
+      label363:
+      boolean bool2 = false;
+      String str3 = null;
+      String str4 = null;
+      String str5 = null;
+      boolean bool3 = false;
+    }
+  }
+  
+  public final Cursor a(String paramString)
+  {
+    synchronized (this.b)
+    {
+      SQLiteDatabase localSQLiteDatabase = this.b.getWritableDatabase();
+      Object[] arrayOfObject = new Object[7];
+      arrayOfObject[0] = "suggest_text_1";
+      arrayOfObject[1] = "suggest_text_2";
+      arrayOfObject[2] = "suggest_intent_data_id";
+      arrayOfObject[3] = "KIKcontactsTable";
+      arrayOfObject[4] = "messagesTable";
+      arrayOfObject[5] = paramString;
+      arrayOfObject[6] = Integer.valueOf(7);
+      Cursor localCursor = localSQLiteDatabase.rawQuery(String.format("SELECT %4$s._id, display_name as %1$s, user_name as %2$s, jid as %3$s FROM %4$s join %5$s ON jid = bin_id WHERE %6$s GROUP BY jid ORDER BY timestamp DESC, display_name COLLATE NOCASE COLLATE LOCALIZED ASC LIMIT %7$s", arrayOfObject), null);
+      return localCursor;
+    }
+  }
+  
+  public final Cursor a(String paramString, String[] paramArrayOfString)
+  {
+    synchronized (this.b)
+    {
+      Cursor localCursor = this.b.getWritableDatabase().rawQuery(String.format("SELECT _id, display_name as %s, user_name as %s, jid as %s FROM %s WHERE %s ORDER BY display_name COLLATE NOCASE COLLATE LOCALIZED ASC", new Object[] { "suggest_text_1", "suggest_text_2", "suggest_intent_data_id", "KIKcontactsTable", paramString }), paramArrayOfString);
+      return localCursor;
+    }
+  }
+  
+  public final Hashtable a()
+  {
+    return a(false);
+  }
+  
+  public final boolean a(List paramList)
+  {
+    synchronized (this.b)
+    {
+      SQLiteDatabase localSQLiteDatabase = this.b.getWritableDatabase();
+      try
+      {
+        localSQLiteDatabase.beginTransaction();
+        Iterator localIterator = paramList.iterator();
+        while (localIterator.hasNext())
+        {
+          h localh = (h)localIterator.next();
+          String str = localh.b();
+          if (str != null)
+          {
+            ContentValues localContentValues = b.a(localh);
+            if (localSQLiteDatabase.update("KIKcontactsTable", localContentValues, "jid ='" + str + "'", null) == 0) {
+              localSQLiteDatabase.insert("KIKcontactsTable", null, localContentValues);
+            }
+          }
+        }
+        boolean bool;
+        localObject1 = finally;
+      }
+      catch (Exception localException)
+      {
+        new StringBuilder("Kikcontact update failed:").append(localException.getMessage());
+        bool = false;
+        localSQLiteDatabase.endTransaction();
+        for (;;)
+        {
+          return bool;
+          localSQLiteDatabase.setTransactionSuccessful();
+          localSQLiteDatabase.endTransaction();
+          bool = true;
+        }
+      }
+      finally
+      {
+        localSQLiteDatabase.endTransaction();
+      }
+    }
+  }
+  
+  public final boolean a(h paramh)
+  {
+    synchronized (this.b)
+    {
+      if ((paramh instanceof kik.a.b.k))
+      {
+        ArrayList localArrayList1 = new ArrayList();
+        localArrayList1.add((kik.a.b.k)paramh);
+        boolean bool1 = b(localArrayList1);
+        return bool1;
+      }
+      ArrayList localArrayList2 = new ArrayList();
+      localArrayList2.add(paramh);
+      boolean bool2 = a(localArrayList2);
+      return bool2;
+    }
+  }
+  
+  public final Hashtable b()
+  {
+    return a(true);
+  }
+  
+  /* Error */
+  public final h b(String paramString)
+  {
+    // Byte code:
+    //   0: aload_0
+    //   1: getfield 27	com/kik/h/i:b	Landroid/database/sqlite/SQLiteOpenHelper;
+    //   4: astore_2
+    //   5: aload_2
+    //   6: monitorenter
+    //   7: aload_0
+    //   8: getfield 27	com/kik/h/i:b	Landroid/database/sqlite/SQLiteOpenHelper;
+    //   11: invokevirtual 42	android/database/sqlite/SQLiteOpenHelper:getWritableDatabase	()Landroid/database/sqlite/SQLiteDatabase;
+    //   14: astore 4
+    //   16: aload 4
+    //   18: ldc 44
+    //   20: ldc 46
+    //   22: ldc 251
+    //   24: iconst_1
+    //   25: anewarray 107	java/lang/String
+    //   28: dup
+    //   29: iconst_0
+    //   30: aload_1
+    //   31: aastore
+    //   32: invokestatic 254	com/kik/h/b:a	(Landroid/database/sqlite/SQLiteDatabase;Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;)Lcom/kik/h/v;
+    //   35: checkcast 44	com/kik/h/b
+    //   38: astore 7
+    //   40: aload 7
+    //   42: invokevirtual 257	com/kik/h/b:moveToFirst	()Z
+    //   45: istore 9
+    //   47: iload 9
+    //   49: ifne +12 -> 61
+    //   52: aload 7
+    //   54: invokevirtual 56	com/kik/h/b:close	()V
+    //   57: aload_2
+    //   58: monitorexit
+    //   59: aconst_null
+    //   60: areturn
+    //   61: aload 7
+    //   63: invokevirtual 260	com/kik/h/b:a	()Lkik/a/b/h;
+    //   66: astore 10
+    //   68: aload 7
+    //   70: invokevirtual 56	com/kik/h/b:close	()V
+    //   73: aload_2
+    //   74: monitorexit
+    //   75: aload 10
+    //   77: areturn
+    //   78: aload 6
+    //   80: invokevirtual 56	com/kik/h/b:close	()V
+    //   83: aload 5
+    //   85: athrow
+    //   86: astore_3
+    //   87: aload_2
+    //   88: monitorexit
+    //   89: aload_3
+    //   90: athrow
+    //   91: astore 8
+    //   93: aload 7
+    //   95: astore 6
+    //   97: aload 8
+    //   99: astore 5
+    //   101: goto -23 -> 78
+    //   104: astore 5
+    //   106: aconst_null
+    //   107: astore 6
+    //   109: goto -31 -> 78
+    // Local variable table:
+    //   start	length	slot	name	signature
+    //   0	112	0	this	i
+    //   0	112	1	paramString	String
+    //   4	84	2	localSQLiteOpenHelper	SQLiteOpenHelper
+    //   86	4	3	localObject1	Object
+    //   14	3	4	localSQLiteDatabase	SQLiteDatabase
+    //   83	17	5	localObject2	Object
+    //   104	1	5	localObject3	Object
+    //   78	30	6	localb1	b
+    //   38	56	7	localb2	b
+    //   91	7	8	localObject4	Object
+    //   45	3	9	bool	boolean
+    //   66	10	10	localh	h
+    // Exception table:
+    //   from	to	target	type
+    //   7	16	86	finally
+    //   52	59	86	finally
+    //   68	75	86	finally
+    //   78	86	86	finally
+    //   87	89	86	finally
+    //   40	47	91	finally
+    //   61	68	91	finally
+    //   16	40	104	finally
+  }
+  
+  public final boolean b(List paramList)
+  {
+    for (;;)
+    {
+      SQLiteDatabase localSQLiteDatabase;
+      synchronized (this.b)
+      {
+        localSQLiteDatabase = this.b.getWritableDatabase();
+        try
+        {
+          localSQLiteDatabase.beginTransaction();
+          Iterator localIterator1 = paramList.iterator();
+          if (localIterator1.hasNext())
+          {
+            kik.a.b.k localk = (kik.a.b.k)localIterator1.next();
+            String str1 = localk.b();
+            List localList1 = localk.u();
+            List localList2 = localk.w();
+            if (str1 == null) {
+              continue;
+            }
+            localSQLiteDatabase.delete("memberTable", "group_id ='" + str1 + "'", null);
+            Iterator localIterator2 = localList1.iterator();
+            if (localIterator2.hasNext())
+            {
+              String str3 = (String)localIterator2.next();
+              ContentValues localContentValues2 = new ContentValues();
+              localContentValues2.put("group_id", str1);
+              localContentValues2.put("member_jid", str3);
+              localContentValues2.put("is_admin", Boolean.valueOf(localk.g(str3)));
+              localContentValues2.put("is_banned", Boolean.valueOf(false));
+              if (localSQLiteDatabase.update("memberTable", localContentValues2, "group_id ='" + str1 + "' AND member_jid = '" + str3 + "'", null) != 0) {
+                continue;
+              }
+              localSQLiteDatabase.insert("memberTable", null, localContentValues2);
+              continue;
+            }
+            Iterator localIterator3;
+            String str2;
+            ContentValues localContentValues1;
+            localObject1 = finally;
+          }
+        }
+        catch (Exception localException)
+        {
+          new StringBuilder("KikGroup update failed:").append(localException.getMessage());
+          localSQLiteDatabase.endTransaction();
+          bool = false;
+          a(new ArrayList(paramList));
+          return bool;
+          localIterator3 = localList2.iterator();
+          if (!localIterator3.hasNext()) {
+            continue;
+          }
+          str2 = (String)localIterator3.next();
+          localContentValues1 = new ContentValues();
+          localContentValues1.put("group_id", str1);
+          localContentValues1.put("member_jid", str2);
+          localContentValues1.put("is_admin", Boolean.valueOf(false));
+          localContentValues1.put("is_banned", Boolean.valueOf(true));
+          if (localSQLiteDatabase.update("memberTable", localContentValues1, "group_id ='" + str1 + "' AND member_jid = '" + str2 + "'", null) != 0) {
+            continue;
+          }
+          localSQLiteDatabase.insert("memberTable", null, localContentValues1);
+          continue;
+        }
+        finally
+        {
+          localSQLiteDatabase.endTransaction();
+        }
+      }
+      localSQLiteDatabase.setTransactionSuccessful();
+      localSQLiteDatabase.endTransaction();
+      boolean bool = true;
+    }
+  }
+  
+  public final boolean c(String paramString)
+  {
+    boolean bool = true;
+    synchronized (this.b)
+    {
+      SQLiteDatabase localSQLiteDatabase = this.b.getWritableDatabase();
+      if (paramString != null) {}
+      try
+      {
+        localSQLiteDatabase.delete("KIKcontactsTable", "jid = ?", new String[] { paramString });
+        return bool;
+      }
+      catch (Exception localException)
+      {
+        for (;;)
+        {
+          localException = localException;
+          new StringBuilder("deleteKIKContact failed: ").append(localException.getMessage());
+          bool = false;
+        }
+      }
+      finally {}
+    }
+  }
+}
